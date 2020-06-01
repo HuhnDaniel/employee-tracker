@@ -1,5 +1,5 @@
 # Employee Tracker
-![GitHub repo size](https://img.shields.io/github/repo-size/HuhnDaniel/employee-tracker)
+![GitHub repo size](https://img.shields.io/github/repo-size/HuhnDaniel/employee-tracker)  
 Content management system designed to allow the user to view and manage departments, roles, and employees in a company.
 ## Table of Contents
 - [Installation](#installation)
