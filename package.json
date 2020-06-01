@@ -1,0 +1,24 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "![GitHub repo size](https://img.shields.io/github/repo-size/HuhnDaniel/employee-tracker)  \r Content management system designed to allow the user to view and manage departments, roles, and employees in a company.\r ## Table of Contents\r - [Installation](#installation)\r - [Usage](#usage)\r - [Author](#author)\r - [Questions](#questions)\r ## Installation\r To install necessary dependencies, run the following command:\r ```\r npm i\r ```\r ## Usage\r Select operations from a list of choices that will allow the user to navigate and manipulate the database.\r ## Author\r Daniel Moody-Huhn\r - https://github.com/HuhnDaniel/\r - https://huhndaniel.github.io/\r ## Questions\r If you have any questions about the repo, please open an issue and I will attempt to respond to it as soon as possible.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HuhnDaniel/employee-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HuhnDaniel/employee-tracker/issues"
+  },
+  "homepage": "https://github.com/HuhnDaniel/employee-tracker#readme",
+  "dependencies": {
+    "inquirer": "^7.1.0",
+    "mysql": "^2.18.1"
+  }
+}
