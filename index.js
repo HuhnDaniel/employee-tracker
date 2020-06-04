@@ -42,13 +42,13 @@ function init() {
                 addEmployee();
                 break;
             case "View department":
-                viewDepartment();
+                viewDepartments();
                 break;
             case "View role":
-                viewRole();
+                viewRoles();
                 break;
             case "View employee":
-                viewEmployee();
+                viewEmployees();
                 break;
             case "Update employee role":
                 updateEmployeeRole();
@@ -64,31 +64,65 @@ function addDepartment() {
     inquirer.prompt({
         name: "departmentName",
         type: "input",
-        message: "Input the department you would like to add: "
+        message: "Input the name of the department you would like to add: "
     }).then(function({ departmentName }) {
-        var queryStr = "INSERT INTO department (name) VALUES (?)";
-        connection.query(queryStr, departmentName);
-        init();
-    })
+        var queryStr = "INSERT INTO departments (name) VALUES (?)";
+        connection.query(queryStr, departmentName, function(err, res) {
+            if (err) throw err;
+            init();
+        });
+    });
 }
 
 function addRole() {
-	init();
+    connection.query("SELECT id, name FROM departments", function(err, res) {
+        const departmentChoices = res.map(
+            ({ id, name }) => 
+            ({ value: id, name: name })
+        );
+        console.log(departmentChoices);
+        
+        inquirer.prompt([
+            {
+                name: "roleTitle",
+                type: "input",
+                message: "Input the title of the role you would like to add: "
+            },
+            {
+                name: "roleSalary",
+                type: "input",
+                message: "Input the salary for this role: "
+            },
+            {
+                name: "departmentUnder",
+                type: "list",
+                message: "What department will this role be listed under?",
+                choices: departmentChoices
+            }
+        ]).then(function(role) {
+            console.log(role);
+            var queryStr = "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
+            connection.query(queryStr, [role.roleTitle, role.roleSalary, role.departmentUnder], function(err, res) {
+                if (err) throw err;
+                init();
+            });
+        });
+    });
 }
 
 function addEmployee() {
+    init();
+}
+
+function viewDepartments() {
 	init();
 }
 
-function viewDepartment() {
+function viewRoles() {
 	init();
 }
 
-function viewRole() {
-	init();
-}
-
-function viewEmployee() {
+function viewEmployees() {
 	init();
 }
 
