@@ -69,6 +69,7 @@ function addDepartment() {
         var queryStr = "INSERT INTO departments (name) VALUES (?)";
         connection.query(queryStr, departmentName, function(err, res) {
             if (err) throw err;
+            console.log(`Added new department ${departmentName}.`);
             init();
         });
     });
@@ -80,7 +81,6 @@ function addRole() {
             ({ id, name }) => 
             ({ value: id, name: name })
         );
-        console.log(departmentChoices);
         
         inquirer.prompt([
             {
@@ -99,11 +99,11 @@ function addRole() {
                 message: "What department will this role be listed under?",
                 choices: departmentChoices
             }
-        ]).then(function(role) {
-            console.log(role);
+        ]).then(function({ roleTitle, roleSalary, departmentUnder }) {
             var queryStr = "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
-            connection.query(queryStr, [role.roleTitle, role.roleSalary, role.departmentUnder], function(err, res) {
+            connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], function(err, res) {
                 if (err) throw err;
+                console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
                 init();
             });
         });
@@ -111,7 +111,52 @@ function addRole() {
 }
 
 function addEmployee() {
-    init();
+    connection.query("SELECT id, first_name, last_name FROM employees", function(err, res) {
+        const managerChoices = res.map(
+            ({ id, first_name, last_name }) =>
+            ({ value: id, name: first_name + " " + last_name })
+        );
+        managerChoices.unshift({ value: null, name: "None" });
+
+        connection.query("SELECT id, title FROM roles", function(err, res) {
+            const roleChoices = res.map(
+                ({ id, title }) =>
+                ({ value: id, name: title})
+            );
+
+            inquirer.prompt([
+                {
+                    name: "firstName",
+                    type: "input",
+                    message: "Input new employee's first name: "
+                },
+                {
+                    name: "lastName",
+                    type: "input",
+                    message: "Input new employee's last name: "
+                },
+                {
+                    name: "employeeRole",
+                    type: "list",
+                    message: "What role will the new employee fill?",
+                    choices: roleChoices
+                },
+                {
+                    name: "employeeManager",
+                    type: "list",
+                    message: "Who will be the manager of the new employee?",
+                    choices: managerChoices
+                }
+            ]).then(function({ firstName, lastName, employeeRole, employeeManager }) {
+                var queryStr = "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+                connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], function(err, res) {
+                    if (err) throw err;
+                    console.log(`Added new employee ${firstName} ${lastName}.`);
+                    init();
+                });
+            });
+        });
+    });
 }
 
 function viewDepartments() {
