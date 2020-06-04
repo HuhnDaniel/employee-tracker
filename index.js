@@ -14,68 +14,62 @@ connection.connect(function (err) {
 	init();
 });
 
-function promptUser() {
-	return inquirer.prompt({
-		name: "action",
-		type: "list",
-		message: "What would you like to do?",
-		choices: [
-			"Add department",
-			"Add role",
-			"Add employee",
-			"View department",
-			"View role",
-			"View employee",
-			"Update employee role",
-			"Exit program"
-		]
-	});
-}
 
-async function init() {
-	try {
-		const { action } = await promptUser();
-
-		switch (action) {
-			case "Add department":
-				addDepartment();
-				break;
-
-			case "Add role":
-				addRole();
-				break;
-
-			case "Add employee":
-				addEmployee();
-				break;
-
-			case "View department":
-				viewDepartment();
-				break;
-
-			case "View role":
-				viewRole();
-				break;
-
-			case "View employee":
-				viewEmployee();
-				break;
-
-			case "Update employee role":
-				updateEmployeeRole();
-				break;
-
-			case "Exit program":
-				connection.end();
-				break;
-		}
-	} catch (err) {
-		console.log(err);
-	}
+function init() {
+    inquirer.prompt({
+        name: "action",
+        type: "list",
+        message: "What would you like to do?",
+        choices: [
+            "Add department",
+            "Add role",
+            "Add employee",
+            "View department",
+            "View role",
+            "View employee",
+            "Update employee role",
+            "Exit program"
+        ]
+    }).then(function({ action }) {
+        switch (action) {
+            case "Add department":
+                addDepartment();
+                break;
+            case "Add role":
+                addRole();
+                break;
+            case "Add employee":
+                addEmployee();
+                break;
+            case "View department":
+                viewDepartment();
+                break;
+            case "View role":
+                viewRole();
+                break;
+            case "View employee":
+                viewEmployee();
+                break;
+            case "Update employee role":
+                updateEmployeeRole();
+                break;
+            case "Exit program":
+                connection.end();
+                break;
+        }
+    });
 }
 
 function addDepartment() {
-	init();
+    inquirer.prompt({
+        name: "departmentName",
+        type: "input",
+        message: "Input the department you would like to add: "
+    }).then(function({ departmentName }) {
+        var queryStr = "INSERT INTO department (name) VALUES (?)";
+        connection.query(queryStr, departmentName);
+        init();
+    })
 }
 
 function addRole() {
