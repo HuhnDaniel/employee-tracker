@@ -158,16 +158,17 @@ function addEmployee() {
 
 function viewDepartments() {
     connection.query(
-        `SELECT roles.id, roles.title, roles.salary, departments.name AS department
-        FROM roles
-        INNER JOIN departments ON roles.department_id = departments.id;`, function(err, res) {
+        `SELECT * FROM roles`, function(err, res) {
         console.table(res);
         init();
     });
 }
 
 function viewRoles() {
-    connection.query(`SELECT * FROM roles`, function(err, res) {
+    connection.query(
+        `SELECT roles.id, roles.title, roles.salary, departments.name AS department
+        FROM roles
+        INNER JOIN departments ON roles.department_id = departments.id;`, function(err, res) {
         console.table(res);
         init();
     });
