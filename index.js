@@ -171,7 +171,10 @@ function viewRoles() {
 }
 
 function viewEmployees() {
-	init();
+    connection.query("SELECT * FROM employees", function(err, res) {
+        console.table(res);
+        init();
+    })
 }
 
 function updateEmployeeRole() {
