@@ -190,5 +190,43 @@ function viewEmployees() {
 }
 
 function updateEmployeeRole() {
-	init();
+    connection.query(`SELECT id, first_name, last_name FROM employees`, function(err, res) {
+        const employeeChoices = res.map(
+            ({ id, first_name, last_name }) =>
+            ({ value: id, name: first_name + ` ` + last_name })
+        );
+
+        connection.query(`SELECT id, title FROM roles`, function(err, res) {
+            const roleChoices = res.map(
+                ({ id, title }) =>
+                ({ value: id, name: title})
+            );
+
+            inquirer.prompt([
+                {
+                    name: `employeeChosen`,
+                    type: `list`,
+                    message: `Which employee's role do you wish to change?`,
+                    choices: employeeChoices
+                },
+                {
+                    name: `newRole`,
+                    type: `list`,
+                    message: `What would you like to change this employee's role to?`,
+                    choices: roleChoices
+                }
+            ]).then(function({ employeeChosen, newRole }) {
+                connection.query(
+                    `UPDATE employees
+                    SET role_id = ?
+                    WHERE id = ?`,
+                    [newRole, employeeChosen],
+                    function(err, res) {
+                        console.log(`Successfully changed employee role!`);
+                        init();
+                    }
+                );
+            });
+        });
+    });
 }
