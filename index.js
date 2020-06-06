@@ -24,9 +24,9 @@ function init() {
             "Add department",
             "Add role",
             "Add employee",
-            "View department",
-            "View role",
-            "View employee",
+            "View departments",
+            "View roles",
+            "View employees",
             "Update employee role",
             "Exit program"
         ]
@@ -41,13 +41,13 @@ function init() {
             case "Add employee":
                 addEmployee();
                 break;
-            case "View department":
+            case "View departments":
                 viewDepartments();
                 break;
-            case "View role":
+            case "View roles":
                 viewRoles();
                 break;
-            case "View employee":
+            case "View employees":
                 viewEmployees();
                 break;
             case "Update employee role":
@@ -68,7 +68,6 @@ function addDepartment() {
     }).then(function({ departmentName }) {
         var queryStr = "INSERT INTO departments (name) VALUES (?)";
         connection.query(queryStr, departmentName, function(err, res) {
-            if (err) throw err;
             console.log(`Added new department ${departmentName}.`);
             init();
         });
@@ -102,7 +101,6 @@ function addRole() {
         ]).then(function({ roleTitle, roleSalary, departmentUnder }) {
             var queryStr = "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
             connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], function(err, res) {
-                if (err) throw err;
                 console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
                 init();
             });
@@ -150,7 +148,6 @@ function addEmployee() {
             ]).then(function({ firstName, lastName, employeeRole, employeeManager }) {
                 var queryStr = "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
                 connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], function(err, res) {
-                    if (err) throw err;
                     console.log(`Added new employee ${firstName} ${lastName}.`);
                     init();
                 });
@@ -160,11 +157,14 @@ function addEmployee() {
 }
 
 function viewDepartments() {
-	init();
+    connection.query("SELECT * FROM departments", function(err, res) {
+        console.table(res);
+        init();
+    });
 }
 
 function viewRoles() {
-	init();
+    init();
 }
 
 function viewEmployees() {
