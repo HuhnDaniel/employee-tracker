@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
 	database: `company_db`
 });
 
-connection.connect(function (err) {
+connection.connect((err) => {
 	if (err) throw err;
 	init();
 });
@@ -30,7 +30,7 @@ function init() {
             `Update employee role`,
             `Exit program`
         ]
-    }).then(function({ action }) {
+    }).then(({ action }) => {
         switch (action) {
             case `View employees`:
                 viewEmployees();
@@ -67,7 +67,7 @@ function viewEmployees() {
         LEFT JOIN employees m ON e.manager_id = m.id
         INNER JOIN roles r ON e.role_id = r.id
         INNER JOIN departments d ON r.department_id = d.id`,
-        function(err, res) {
+        (err, res) => {
             console.table(res);
             init();
         }
@@ -75,14 +75,14 @@ function viewEmployees() {
 }
 
 function addEmployee() {
-    connection.query(`SELECT id, first_name, last_name FROM employees`, function(err, res) {
+    connection.query(`SELECT id, first_name, last_name FROM employees`, (err, res) => {
         const managerChoices = res.map(
             ({ id, first_name, last_name }) =>
             ({ value: id, name: first_name + ` ` + last_name })
         );
         managerChoices.unshift({ value: null, name: `None` });
 
-        connection.query(`SELECT id, title FROM roles`, function(err, res) {
+        connection.query(`SELECT id, title FROM roles`, (err, res) => {
             const roleChoices = res.map(
                 ({ id, title }) =>
                 ({ value: id, name: title})
@@ -111,9 +111,9 @@ function addEmployee() {
                     message: `Who will be the manager of the new employee?`,
                     choices: managerChoices
                 }
-            ]).then(function({ firstName, lastName, employeeRole, employeeManager }) {
+            ]).then(({ firstName, lastName, employeeRole, employeeManager }) => {
                 var queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-                connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], function(err, res) {
+                connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
                     console.log(`Added new employee ${firstName} ${lastName}.`);
                     init();
                 });
@@ -123,7 +123,7 @@ function addEmployee() {
 }
 
 function viewDepartments() {
-    connection.query(`SELECT * FROM departments`, function(err, res) {
+    connection.query(`SELECT * FROM departments`, (err, res) => {
         console.table(res);
         init();
     });
@@ -136,7 +136,7 @@ function addDepartment() {
         message: `Input the name of the department you would like to add: `
     }).then(function({ departmentName }) {
         var queryStr = `INSERT INTO departments (name) VALUES (?)`;
-        connection.query(queryStr, departmentName, function(err, res) {
+        connection.query(queryStr, departmentName, (err, res) => {
             console.log(`Added new ${departmentName} department.`);
             init();
         });
@@ -148,7 +148,7 @@ function viewRoles() {
         `SELECT roles.id, roles.title, roles.salary, departments.name AS department
         FROM roles
         INNER JOIN departments ON roles.department_id = departments.id`,
-        function(err, res) {
+        (err, res) => {
             console.table(res);
             init();
         }
@@ -156,7 +156,7 @@ function viewRoles() {
 }
 
 function addRole() {
-    connection.query(`SELECT id, name FROM departments`, function(err, res) {
+    connection.query(`SELECT id, name FROM departments`, (err, res) => {
         const departmentChoices = res.map(
             ({ id, name }) => 
             ({ value: id, name: name })
@@ -179,9 +179,9 @@ function addRole() {
                 message: `What department will this role be listed under?`,
                 choices: departmentChoices
             }
-        ]).then(function({ roleTitle, roleSalary, departmentUnder }) {
+        ]).then(({ roleTitle, roleSalary, departmentUnder }) => {
             var queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
-            connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], function(err, res) {
+            connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
                 console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
                 init();
             });
@@ -190,13 +190,13 @@ function addRole() {
 }
 
 function updateEmployeeRole() {
-    connection.query(`SELECT id, first_name, last_name FROM employees`, function(err, res) {
+    connection.query(`SELECT id, first_name, last_name FROM employees`, (err, res) => {
         const employeeChoices = res.map(
             ({ id, first_name, last_name }) =>
             ({ value: id, name: first_name + ` ` + last_name })
         );
 
-        connection.query(`SELECT id, title FROM roles`, function(err, res) {
+        connection.query(`SELECT id, title FROM roles`, (err, res) => {
             const roleChoices = res.map(
                 ({ id, title }) =>
                 ({ value: id, name: title})
@@ -215,13 +215,13 @@ function updateEmployeeRole() {
                     message: `What would you like to change this employee's role to?`,
                     choices: roleChoices
                 }
-            ]).then(function({ employeeChosen, newRole }) {
+            ]).then(({ employeeChosen, newRole }) => {
                 connection.query(
                     `UPDATE employees
                     SET role_id = ?
                     WHERE id = ?`,
                     [newRole, employeeChosen],
-                    function(err, res) {
+                    (err, res) => {
                         console.log(`Successfully changed employee role!`);
                         init();
                     }
