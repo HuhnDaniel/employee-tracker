@@ -21,22 +21,19 @@ function init() {
         type: `list`,
         message: `What would you like to do?`,
         choices: [
-            `Add department`,
-            `Add role`,
+            `View employees`,
             `Add employee`,
             `View departments`,
+            `Add department`,
             `View roles`,
-            `View employees`,
+            `Add role`,
             `Update employee role`,
             `Exit program`
         ]
     }).then(function({ action }) {
         switch (action) {
-            case `Add department`:
-                addDepartment();
-                break;
-            case `Add role`:
-                addRole();
+            case `View employees`:
+                viewEmployees();
                 break;
             case `Add employee`:
                 addEmployee();
@@ -44,11 +41,14 @@ function init() {
             case `View departments`:
                 viewDepartments();
                 break;
+            case `Add department`:
+                addDepartment();
+                break;
             case `View roles`:
                 viewRoles();
                 break;
-            case `View employees`:
-                viewEmployees();
+            case `Add role`:
+                addRole();
                 break;
             case `Update employee role`:
                 updateEmployeeRole();
@@ -60,52 +60,18 @@ function init() {
     });
 }
 
-function addDepartment() {
-    inquirer.prompt({
-        name: `departmentName`,
-        type: `input`,
-        message: `Input the name of the department you would like to add: `
-    }).then(function({ departmentName }) {
-        var queryStr = `INSERT INTO departments (name) VALUES (?)`;
-        connection.query(queryStr, departmentName, function(err, res) {
-            console.log(`Added new ${departmentName} department.`);
+function viewEmployees() {
+    connection.query(
+        `SELECT  e.id, e.first_name, e.last_name, r.title, d.name, r.salary, CONCAT(m.first_name, ' ' , m. last_name) AS Manager
+        FROM employees e
+        LEFT JOIN employees m ON e.manager_id = m.id
+        INNER JOIN roles r ON e.role_id = r.id
+        INNER JOIN departments d ON r.department_id = d.id`,
+        function(err, res) {
+            console.table(res);
             init();
-        });
-    });
-}
-
-function addRole() {
-    connection.query(`SELECT id, name FROM departments`, function(err, res) {
-        const departmentChoices = res.map(
-            ({ id, name }) => 
-            ({ value: id, name: name })
-        );
-        
-        inquirer.prompt([
-            {
-                name: `roleTitle`,
-                type: `input`,
-                message: `Input the title of the role you would like to add: `
-            },
-            {
-                name: `roleSalary`,
-                type: `input`,
-                message: `Input the salary for this role: `
-            },
-            {
-                name: `departmentUnder`,
-                type: `list`,
-                message: `What department will this role be listed under?`,
-                choices: departmentChoices
-            }
-        ]).then(function({ roleTitle, roleSalary, departmentUnder }) {
-            var queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
-            connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], function(err, res) {
-                console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
-                init();
-            });
-        });
-    });
+        }
+    );
 }
 
 function addEmployee() {
@@ -163,6 +129,20 @@ function viewDepartments() {
     });
 }
 
+function addDepartment() {
+    inquirer.prompt({
+        name: `departmentName`,
+        type: `input`,
+        message: `Input the name of the department you would like to add: `
+    }).then(function({ departmentName }) {
+        var queryStr = `INSERT INTO departments (name) VALUES (?)`;
+        connection.query(queryStr, departmentName, function(err, res) {
+            console.log(`Added new ${departmentName} department.`);
+            init();
+        });
+    });
+}
+
 function viewRoles() {
     connection.query(
         `SELECT roles.id, roles.title, roles.salary, departments.name AS department
@@ -175,18 +155,38 @@ function viewRoles() {
     );
 }
 
-function viewEmployees() {
-    connection.query(
-        `SELECT  e.id, e.first_name, e.last_name, r.title, d.name, r.salary, CONCAT(m.first_name, ' ' , m. last_name) AS Manager
-        FROM employees e
-        LEFT JOIN employees m ON e.manager_id = m.id
-        INNER JOIN roles r ON e.role_id = r.id
-        INNER JOIN departments d ON r.department_id = d.id`,
-        function(err, res) {
-            console.table(res);
-            init();
-        }
-    );
+function addRole() {
+    connection.query(`SELECT id, name FROM departments`, function(err, res) {
+        const departmentChoices = res.map(
+            ({ id, name }) => 
+            ({ value: id, name: name })
+        );
+        
+        inquirer.prompt([
+            {
+                name: `roleTitle`,
+                type: `input`,
+                message: `Input the title of the role you would like to add: `
+            },
+            {
+                name: `roleSalary`,
+                type: `input`,
+                message: `Input the salary for this role: `
+            },
+            {
+                name: `departmentUnder`,
+                type: `list`,
+                message: `What department will this role be listed under?`,
+                choices: departmentChoices
+            }
+        ]).then(function({ roleTitle, roleSalary, departmentUnder }) {
+            var queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+            connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], function(err, res) {
+                console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
+                init();
+            });
+        });
+    });
 }
 
 function updateEmployeeRole() {
