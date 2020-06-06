@@ -134,7 +134,7 @@ function addDepartment() {
         name: `departmentName`,
         type: `input`,
         message: `Input the name of the department you would like to add: `
-    }).then(function({ departmentName }) {
+    }).then(({ departmentName }) => {
         var queryStr = `INSERT INTO departments (name) VALUES (?)`;
         connection.query(queryStr, departmentName, (err, res) => {
             console.log(`Added new ${departmentName} department.`);
