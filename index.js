@@ -157,8 +157,7 @@ function addEmployee() {
 }
 
 function viewDepartments() {
-    connection.query(
-        `SELECT * FROM roles`, function(err, res) {
+    connection.query(`SELECT * FROM departments`, function(err, res) {
         console.table(res);
         init();
     });
@@ -168,17 +167,26 @@ function viewRoles() {
     connection.query(
         `SELECT roles.id, roles.title, roles.salary, departments.name AS department
         FROM roles
-        INNER JOIN departments ON roles.department_id = departments.id;`, function(err, res) {
-        console.table(res);
-        init();
-    });
+        INNER JOIN departments ON roles.department_id = departments.id`,
+        function(err, res) {
+            console.table(res);
+            init();
+        }
+    );
 }
 
 function viewEmployees() {
-    connection.query(`SELECT * FROM employees`, function(err, res) {
-        console.table(res);
-        init();
-    })
+    connection.query(
+        `SELECT  e.id, e.first_name, e.last_name, r.title, d.name, r.salary, CONCAT(m.first_name, ' ' , m. last_name) AS Manager
+        FROM employees e
+        LEFT JOIN employees m ON e.manager_id = m.id
+        INNER JOIN roles r ON e.role_id = r.id
+        INNER JOIN departments d ON r.department_id = d.id`,
+        function(err, res) {
+            console.table(res);
+            init();
+        }
+    );
 }
 
 function updateEmployeeRole() {
