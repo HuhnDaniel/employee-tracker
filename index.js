@@ -69,49 +69,47 @@ async function addEmployee() {
         ({ value: id, name: first_name + ` ` + last_name })
     );
     managerChoices.unshift({ value: null, name: `None` });
-    console.log(managerChoices);
 
-        // Query to get a list of possible roles
-        connection.query(`SELECT id, title FROM roles`, (err, res) => {
-            const roleChoices = res.map(
-                ({ id, title }) =>
-                ({ value: id, name: title})
-            );
+    // Query to get a list of possible roles
+    const roles = await db.findAllRoles();
+    const roleChoices = roles.map(
+        ({ id, title }) =>
+        ({ value: id, name: title})
+    );
 
-            // Prompt for new employee info
-            prompt([
-                {
-                    name: `firstName`,
-                    type: `input`,
-                    message: `Input new employee's first name: `
-                },
-                {
-                    name: `lastName`,
-                    type: `input`,
-                    message: `Input new employee's last name: `
-                },
-                {
-                    name: `employeeRole`,
-                    type: `list`,
-                    message: `What role will the new employee fill?`,
-                    choices: roleChoices
-                },
-                {
-                    name: `employeeManager`,
-                    type: `list`,
-                    message: `Who will be the manager of the new employee?`,
-                    choices: managerChoices
-                }
-            ]).then(({ firstName, lastName, employeeRole, employeeManager }) => {
+    // Prompt for new employee info
+    prompt([
+        {
+            name: `firstName`,
+            type: `input`,
+            message: `Input new employee's first name: `
+        },
+        {
+            name: `lastName`,
+            type: `input`,
+            message: `Input new employee's last name: `
+        },
+        {
+            name: `employeeRole`,
+            type: `list`,
+            message: `What role will the new employee fill?`,
+            choices: roleChoices
+        },
+        {
+            name: `employeeManager`,
+            type: `list`,
+            message: `Who will be the manager of the new employee?`,
+            choices: managerChoices
+        }
+    ]).then(({ firstName, lastName, employeeRole, employeeManager }) => {
 
-                // Add new employee info into database
-                const queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-                connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
-                    console.log(`Added new employee ${firstName} ${lastName}.`);
-                    init();
-                });
-            });
+        // Add new employee info into database
+        const queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+        connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
+            console.log(`Added new employee ${firstName} ${lastName}.`);
+            init();
         });
+    });
 }
 
 // Function to view all departments
@@ -148,90 +146,87 @@ async function viewRoles() {
 }
 
 // Function to add new type of role
-function addRole() {
+async function addRole() {
 
     // Query to find all possible departments that could contain the new role
-    connection.query(`SELECT id, name FROM departments`, (err, res) => {
-        const departmentChoices = res.map(
-            ({ id, name }) => 
-            ({ value: id, name: name })
-        );
+    const depts = await db.findAllDepartments();
+    const departmentChoices = depts.map(
+        ({ id, name }) => 
+        ({ value: id, name: name })
+    );
         
-        // Prompt for new role info
-        prompt([
-            {
-                name: `roleTitle`,
-                type: `input`,
-                message: `Input the title of the role you would like to add: `
-            },
-            {
-                name: `roleSalary`,
-                type: `input`,
-                message: `Input the salary for this role: `
-            },
-            {
-                name: `departmentUnder`,
-                type: `list`,
-                message: `What department will this role be listed under?`,
-                choices: departmentChoices
-            }
-        ]).then(({ roleTitle, roleSalary, departmentUnder }) => {
+    // Prompt for new role info
+    prompt([
+        {
+            name: `roleTitle`,
+            type: `input`,
+            message: `Input the title of the role you would like to add: `
+        },
+        {
+            name: `roleSalary`,
+            type: `input`,
+            message: `Input the salary for this role: `
+        },
+        {
+            name: `departmentUnder`,
+            type: `list`,
+            message: `What department will this role be listed under?`,
+            choices: departmentChoices
+        }
+    ]).then(({ roleTitle, roleSalary, departmentUnder }) => {
 
-            // Query to add new role to database
-            const queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
-            connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
-                console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
-                init();
-            });
+        // Query to add new role to database
+        const queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+        connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
+            console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
+            init();
         });
     });
 }
 
 // Function to update the role an employee holds
-function updateEmployeeRole() {
+async function updateEmployeeRole() {
 
     // Query to retrieve all employees list
-    connection.query(`SELECT id, first_name, last_name FROM employees`, (err, res) => {
-        const employeeChoices = res.map(
-            ({ id, first_name, last_name }) =>
-            ({ value: id, name: first_name + ` ` + last_name })
+    const employees = await db.findAllEmployees();
+    const employeeChoices = res.map(
+        ({ id, first_name, last_name }) =>
+        ({ value: id, name: first_name + ` ` + last_name })
+    );
+
+    // Query to retrieve all roles list
+    const roles = await db.findAllRoles();
+    const roleChoices = res.map(
+        ({ id, title }) =>
+        ({ value: id, name: title})
+    );
+
+    // Prompt for which employee to change to which role
+    prompt([
+        {
+            name: `employeeChosen`,
+            type: `list`,
+            message: `Which employee's role do you wish to change?`,
+            choices: employeeChoices
+        },
+        {
+            name: `newRole`,
+            type: `list`,
+            message: `What would you like to change this employee's role to?`,
+            choices: roleChoices
+        }
+    ]).then(({ employeeChosen, newRole }) => {
+
+        // Query to update database accordingly
+        connection.query(
+            `UPDATE employees
+            SET role_id = ?
+            WHERE id = ?`,
+            [newRole, employeeChosen],
+            (err, res) => {
+                console.log(`Successfully changed employee role!`);
+                init();
+            }
         );
-
-        // Query to retrieve all roles list
-        connection.query(`SELECT id, title FROM roles`, (err, res) => {
-            const roleChoices = res.map(
-                ({ id, title }) =>
-                ({ value: id, name: title})
-            );
-
-            // Prompt for which employee to change to which role
-            prompt([
-                {
-                    name: `employeeChosen`,
-                    type: `list`,
-                    message: `Which employee's role do you wish to change?`,
-                    choices: employeeChoices
-                },
-                {
-                    name: `newRole`,
-                    type: `list`,
-                    message: `What would you like to change this employee's role to?`,
-                    choices: roleChoices
-                }
-            ]).then(({ employeeChosen, newRole }) => {
-
-                // Query to update database accordingly
-                connection.query(
-                    `UPDATE employees
-                    SET role_id = ?
-                    WHERE id = ?`,
-                    [newRole, employeeChosen],
-                    (err, res) => {
-                        console.log(`Successfully changed employee role!`);
-                        init();
-                    }
-                );
-            });
-        });
     });
 }
