@@ -1,5 +1,6 @@
-var connection = require(`./assets/connection`);
-var { prompt } = require(`inquirer`);
+const connection = require(`./assets/connection`);
+const { prompt } = require(`inquirer`);
+const db = require(`./assets/dbFunctions`);
 
 init();
 
@@ -50,18 +51,10 @@ function init() {
 }
 
 // Function to view all employees and their relevant information
-function viewEmployees() {
-    connection.query(
-        `SELECT  e.id, e.first_name, e.last_name, r.title, d.name, r.salary, CONCAT(m.first_name, ' ' , m. last_name) AS Manager
-        FROM employees e
-        LEFT JOIN employees m ON e.manager_id = m.id
-        INNER JOIN roles r ON e.role_id = r.id
-        INNER JOIN departments d ON r.department_id = d.id`,
-        (err, res) => {
-            console.table(res);
-            init();
-        }
-    );
+async function viewEmployees() {
+    const employees = await db.findAllEmployees();
+    console.table(employees);
+    init();
 }
 
 // Function to add an employee
@@ -109,7 +102,7 @@ function addEmployee() {
             ]).then(({ firstName, lastName, employeeRole, employeeManager }) => {
 
                 // Add new employee info into database
-                var queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                const queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
                 connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
                     console.log(`Added new employee ${firstName} ${lastName}.`);
                     init();
@@ -134,7 +127,7 @@ function addDepartment() {
         type: `input`,
         message: `Input the name of the department you would like to add: `
     }).then(({ departmentName }) => {
-        var queryStr = `INSERT INTO departments (name) VALUES (?)`;
+        const queryStr = `INSERT INTO departments (name) VALUES (?)`;
         connection.query(queryStr, departmentName, (err, res) => {
             console.log(`Added new ${departmentName} department.`);
             init();
@@ -186,7 +179,7 @@ function addRole() {
         ]).then(({ roleTitle, roleSalary, departmentUnder }) => {
 
             // Query to add new role to database
-            var queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+            const queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
             connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
                 console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
                 init();
