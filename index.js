@@ -53,20 +53,23 @@ function init() {
 // Function to view all employees and their relevant information
 async function viewEmployees() {
     const employees = await db.findAllEmployees();
+
     console.table(employees);
+
     init();
 }
 
 // Function to add an employee
-function addEmployee() {
+async function addEmployee() {
 
     // Query to get list of possible managers
-    connection.query(`SELECT id, first_name, last_name FROM employees`, (err, res) => {
-        const managerChoices = res.map(
-            ({ id, first_name, last_name }) =>
-            ({ value: id, name: first_name + ` ` + last_name })
-        );
-        managerChoices.unshift({ value: null, name: `None` });
+    const employees = await db.findAllEmployees();
+    const managerChoices = employees.map(
+        ({ id, first_name, last_name }) =>
+        ({ value: id, name: first_name + ` ` + last_name })
+    );
+    managerChoices.unshift({ value: null, name: `None` });
+    console.log(managerChoices);
 
         // Query to get a list of possible roles
         connection.query(`SELECT id, title FROM roles`, (err, res) => {
@@ -109,15 +112,15 @@ function addEmployee() {
                 });
             });
         });
-    });
 }
 
 // Function to view all departments
-function viewDepartments() {
-    connection.query(`SELECT * FROM departments`, (err, res) => {
-        console.table(res);
-        init();
-    });
+async function viewDepartments() {
+    const depts = await db.findAllDepartments();
+
+    console.table(depts);
+
+    init();
 }
 
 // Function to insert user named department into database
@@ -136,16 +139,12 @@ function addDepartment() {
 }
 
 // Function to view all roles
-function viewRoles() {
-    connection.query(
-        `SELECT roles.id, roles.title, roles.salary, departments.name AS department
-        FROM roles
-        INNER JOIN departments ON roles.department_id = departments.id`,
-        (err, res) => {
-            console.table(res);
-            init();
-        }
-    );
+async function viewRoles() {
+    const roles = await db.findAllRoles();
+
+    console.table(roles);
+    
+    init();
 }
 
 // Function to add new type of role

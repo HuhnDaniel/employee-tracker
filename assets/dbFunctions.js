@@ -9,6 +9,20 @@ const db = {
             INNER JOIN roles r ON e.role_id = r.id
             INNER JOIN departments d ON r.department_id = d.id`
         );
+    },
+
+    findAllRoles: function() {
+        return connection.query(
+            `SELECT roles.id, roles.title, roles.salary, departments.name AS department
+            FROM roles
+            INNER JOIN departments ON roles.department_id = departments.id`
+        );
+    },
+
+    findAllDepartments: function() {
+        return connection.query(
+            `SELECT * FROM departments`
+        );
     }
 }
 
