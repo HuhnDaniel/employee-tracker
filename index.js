@@ -14,7 +14,7 @@ connection.connect((err) => {
 	init();
 });
 
-
+// Main function that takes user input and directs them accordingly
 function init() {
     prompt({
         name: `action`,
@@ -60,6 +60,7 @@ function init() {
     });
 }
 
+// Function to view all employees and their relevant information
 function viewEmployees() {
     connection.query(
         `SELECT  e.id, e.first_name, e.last_name, r.title, d.name, r.salary, CONCAT(m.first_name, ' ' , m. last_name) AS Manager
@@ -74,7 +75,10 @@ function viewEmployees() {
     );
 }
 
+// Function to add an employee
 function addEmployee() {
+
+    // Query to get list of possible managers
     connection.query(`SELECT id, first_name, last_name FROM employees`, (err, res) => {
         const managerChoices = res.map(
             ({ id, first_name, last_name }) =>
@@ -82,12 +86,14 @@ function addEmployee() {
         );
         managerChoices.unshift({ value: null, name: `None` });
 
+        // Query to get a list of possible roles
         connection.query(`SELECT id, title FROM roles`, (err, res) => {
             const roleChoices = res.map(
                 ({ id, title }) =>
                 ({ value: id, name: title})
             );
 
+            // Prompt for new employee info
             prompt([
                 {
                     name: `firstName`,
@@ -112,6 +118,8 @@ function addEmployee() {
                     choices: managerChoices
                 }
             ]).then(({ firstName, lastName, employeeRole, employeeManager }) => {
+
+                // Add new employee info into database
                 var queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
                 connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
                     console.log(`Added new employee ${firstName} ${lastName}.`);
@@ -122,6 +130,7 @@ function addEmployee() {
     });
 }
 
+// Function to view all departments
 function viewDepartments() {
     connection.query(`SELECT * FROM departments`, (err, res) => {
         console.table(res);
@@ -129,6 +138,7 @@ function viewDepartments() {
     });
 }
 
+// Function to insert user named department into database
 function addDepartment() {
     prompt({
         name: `departmentName`,
@@ -143,6 +153,7 @@ function addDepartment() {
     });
 }
 
+// Function to view all roles
 function viewRoles() {
     connection.query(
         `SELECT roles.id, roles.title, roles.salary, departments.name AS department
@@ -155,13 +166,17 @@ function viewRoles() {
     );
 }
 
+// Function to add new type of role
 function addRole() {
+
+    // Query to find all possible departments that could contain the new role
     connection.query(`SELECT id, name FROM departments`, (err, res) => {
         const departmentChoices = res.map(
             ({ id, name }) => 
             ({ value: id, name: name })
         );
         
+        // Prompt for new role info
         prompt([
             {
                 name: `roleTitle`,
@@ -180,6 +195,8 @@ function addRole() {
                 choices: departmentChoices
             }
         ]).then(({ roleTitle, roleSalary, departmentUnder }) => {
+
+            // Query to add new role to database
             var queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
             connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
                 console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
@@ -189,19 +206,24 @@ function addRole() {
     });
 }
 
+// Function to update the role an employee holds
 function updateEmployeeRole() {
+
+    // Query to retrieve all employees list
     connection.query(`SELECT id, first_name, last_name FROM employees`, (err, res) => {
         const employeeChoices = res.map(
             ({ id, first_name, last_name }) =>
             ({ value: id, name: first_name + ` ` + last_name })
         );
 
+        // Query to retrieve all roles list
         connection.query(`SELECT id, title FROM roles`, (err, res) => {
             const roleChoices = res.map(
                 ({ id, title }) =>
                 ({ value: id, name: title})
             );
 
+            // Prompt for which employee to change to which role
             prompt([
                 {
                     name: `employeeChosen`,
@@ -216,6 +238,8 @@ function updateEmployeeRole() {
                     choices: roleChoices
                 }
             ]).then(({ employeeChosen, newRole }) => {
+
+                // Query to update database accordingly
                 connection.query(
                     `UPDATE employees
                     SET role_id = ?
