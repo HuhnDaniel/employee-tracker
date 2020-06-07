@@ -5,8 +5,8 @@ const db = require(`./assets/dbFunctions`);
 init();
 
 // Main function that takes user input and directs them accordingly
-function init() {
-    prompt({
+async function init() {
+    const { action } = await prompt({
         name: `action`,
         type: `list`,
         message: `What would you like to do?`,
@@ -20,34 +20,34 @@ function init() {
             `Update employee role`,
             `Exit program`
         ]
-    }).then(({ action }) => {
-        switch (action) {
-            case `View employees`:
-                viewEmployees();
-                break;
-            case `Add employee`:
-                addEmployee();
-                break;
-            case `View departments`:
-                viewDepartments();
-                break;
-            case `Add department`:
-                addDepartment();
-                break;
-            case `View roles`:
-                viewRoles();
-                break;
-            case `Add role`:
-                addRole();
-                break;
-            case `Update employee role`:
-                updateEmployeeRole();
-                break;
-            case `Exit program`:
-                connection.end();
-                break;
-        }
     });
+
+    switch (action) {
+        case `View employees`:
+            viewEmployees();
+            break;
+        case `Add employee`:
+            addEmployee();
+            break;
+        case `View departments`:
+            viewDepartments();
+            break;
+        case `Add department`:
+            addDepartment();
+            break;
+        case `View roles`:
+            viewRoles();
+            break;
+        case `Add role`:
+            addRole();
+            break;
+        case `Update employee role`:
+            updateEmployeeRole();
+            break;
+        case `Exit program`:
+            connection.end();
+            break;
+    }
 }
 
 // Function to view all employees and their relevant information
@@ -78,7 +78,7 @@ async function addEmployee() {
     );
 
     // Prompt for new employee info
-    prompt([
+    const { firstName, lastName, employeeRole, employeeManager } = await prompt([
         {
             name: `firstName`,
             type: `input`,
@@ -101,14 +101,13 @@ async function addEmployee() {
             message: `Who will be the manager of the new employee?`,
             choices: managerChoices
         }
-    ]).then(({ firstName, lastName, employeeRole, employeeManager }) => {
+    ]);
 
-        // Add new employee info into database
-        const queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-        connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
-            console.log(`Added new employee ${firstName} ${lastName}.`);
-            init();
-        });
+    // Add new employee info into database
+    const queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+    connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
+        console.log(`Added new employee ${firstName} ${lastName}.`);
+        init();
     });
 }
 
@@ -123,16 +122,16 @@ async function viewDepartments() {
 
 // Function to insert user named department into database
 function addDepartment() {
-    prompt({
+    const departmentName = await prompt({
         name: `departmentName`,
         type: `input`,
         message: `Input the name of the department you would like to add: `
-    }).then(({ departmentName }) => {
-        const queryStr = `INSERT INTO departments (name) VALUES (?)`;
-        connection.query(queryStr, departmentName, (err, res) => {
-            console.log(`Added new ${departmentName} department.`);
-            init();
-        });
+    });
+
+    const queryStr = `INSERT INTO departments (name) VALUES (?)`;
+    connection.query(queryStr, departmentName, (err, res) => {
+        console.log(`Added new ${departmentName} department.`);
+        init();
     });
 }
 
@@ -156,7 +155,7 @@ async function addRole() {
     );
         
     // Prompt for new role info
-    prompt([
+    const { roleTitle, roleSalary, departmentUnder } = await prompt([
         {
             name: `roleTitle`,
             type: `input`,
@@ -173,14 +172,13 @@ async function addRole() {
             message: `What department will this role be listed under?`,
             choices: departmentChoices
         }
-    ]).then(({ roleTitle, roleSalary, departmentUnder }) => {
+    ]);
 
-        // Query to add new role to database
-        const queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
-        connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
-            console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
-            init();
-        });
+    // Query to add new role to database
+    const queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+    connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
+        console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
+        init();
     });
 }
 
@@ -189,20 +187,20 @@ async function updateEmployeeRole() {
 
     // Query to retrieve all employees list
     const employees = await db.findAllEmployees();
-    const employeeChoices = res.map(
+    const employeeChoices = employees.map(
         ({ id, first_name, last_name }) =>
         ({ value: id, name: first_name + ` ` + last_name })
     );
 
     // Query to retrieve all roles list
     const roles = await db.findAllRoles();
-    const roleChoices = res.map(
+    const roleChoices = roles.map(
         ({ id, title }) =>
         ({ value: id, name: title})
     );
 
     // Prompt for which employee to change to which role
-    prompt([
+    const { employeeChosen, newRole } = await prompt([
         {
             name: `employeeChosen`,
             type: `list`,
@@ -215,18 +213,17 @@ async function updateEmployeeRole() {
             message: `What would you like to change this employee's role to?`,
             choices: roleChoices
         }
-    ]).then(({ employeeChosen, newRole }) => {
+    ]);
 
-        // Query to update database accordingly
-        connection.query(
-            `UPDATE employees
-            SET role_id = ?
-            WHERE id = ?`,
-            [newRole, employeeChosen],
-            (err, res) => {
-                console.log(`Successfully changed employee role!`);
-                init();
-            }
-        );
-    });
+    // Query to update database accordingly
+    connection.query(
+        `UPDATE employees
+        SET role_id = ?
+        WHERE id = ?`,
+        [newRole, employeeChosen],
+        (err, res) => {
+            console.log(`Successfully changed employee role!`);
+            init();
+        }
+    );
 }
