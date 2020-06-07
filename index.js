@@ -1,18 +1,7 @@
-var mysql = require(`mysql`);
+var connection = require(`./assets/connection`);
 var { prompt } = require(`inquirer`);
 
-var connection = mysql.createConnection({
-	host: `localhost`,
-	port: 3306,
-	user: `root`,
-	password: `password`,
-	database: `company_db`
-});
-
-connection.connect((err) => {
-	if (err) throw err;
-	init();
-});
+init();
 
 // Main function that takes user input and directs them accordingly
 function init() {
