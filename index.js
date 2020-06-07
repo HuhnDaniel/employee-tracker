@@ -1,5 +1,5 @@
 var mysql = require(`mysql`);
-var inquirer = require(`inquirer`);
+var { prompt } = require(`inquirer`);
 
 var connection = mysql.createConnection({
 	host: `localhost`,
@@ -16,7 +16,7 @@ connection.connect((err) => {
 
 
 function init() {
-    inquirer.prompt({
+    prompt({
         name: `action`,
         type: `list`,
         message: `What would you like to do?`,
@@ -88,7 +88,7 @@ function addEmployee() {
                 ({ value: id, name: title})
             );
 
-            inquirer.prompt([
+            prompt([
                 {
                     name: `firstName`,
                     type: `input`,
@@ -130,7 +130,7 @@ function viewDepartments() {
 }
 
 function addDepartment() {
-    inquirer.prompt({
+    prompt({
         name: `departmentName`,
         type: `input`,
         message: `Input the name of the department you would like to add: `
@@ -162,7 +162,7 @@ function addRole() {
             ({ value: id, name: name })
         );
         
-        inquirer.prompt([
+        prompt([
             {
                 name: `roleTitle`,
                 type: `input`,
@@ -202,7 +202,7 @@ function updateEmployeeRole() {
                 ({ value: id, name: title})
             );
 
-            inquirer.prompt([
+            prompt([
                 {
                     name: `employeeChosen`,
                     type: `list`,
