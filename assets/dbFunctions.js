@@ -23,6 +23,40 @@ const db = {
         return connection.query(
             `SELECT * FROM departments`
         );
+    },
+
+    addNewEmployee: function(firstName, lastName, employeeRole, employeeManager) {
+        return connection.query(
+            `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`,
+            [firstName, lastName, employeeRole, employeeManager]
+        );
+    },
+
+    addNewDepartment: function(departmentName) {
+        return connection.query(
+            `INSERT INTO departments (name) VALUES (?)`,
+            departmentName
+        );
+    },
+
+    addNewRole: function(roleTitle, roleSalary, departmentUnder) {
+        return connection.query(
+            `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`,
+            [roleTitle, roleSalary, departmentUnder]
+        );
+    },
+
+    modifyRole: function(employeeChosen, newRole) {
+        return connection.query(
+            `UPDATE employees
+            SET role_id = ?
+            WHERE id = ?`,
+            [newRole, employeeChosen]
+        );
+    },
+
+    end: function() {
+        return connection.end();
     }
 }
 

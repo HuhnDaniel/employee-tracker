@@ -45,7 +45,7 @@ async function init() {
             updateEmployeeRole();
             break;
         case `Exit program`:
-            connection.end();
+            db.end();
             break;
     }
 }
@@ -104,11 +104,11 @@ async function addEmployee() {
     ]);
 
     // Add new employee info into database
-    const queryStr = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
-    connection.query(queryStr, [firstName, lastName, employeeRole, employeeManager], (err, res) => {
-        console.log(`Added new employee ${firstName} ${lastName}.`);
-        init();
-    });
+    await db.addNewEmployee(firstName, lastName, employeeRole, employeeManager);
+
+    console.log(`Added new employee ${firstName} ${lastName}.`);
+
+    init();
 }
 
 // Function to view all departments
@@ -121,18 +121,19 @@ async function viewDepartments() {
 }
 
 // Function to insert user named department into database
-function addDepartment() {
-    const departmentName = await prompt({
+async function addDepartment() {
+    const { departmentName } = await prompt({
         name: `departmentName`,
         type: `input`,
         message: `Input the name of the department you would like to add: `
     });
 
-    const queryStr = `INSERT INTO departments (name) VALUES (?)`;
-    connection.query(queryStr, departmentName, (err, res) => {
-        console.log(`Added new ${departmentName} department.`);
-        init();
-    });
+    // Add new department to database
+    await db.addNewDepartment(departmentName);
+        
+    console.log(`Added new ${departmentName} department.`);
+    
+    init();
 }
 
 // Function to view all roles
@@ -175,11 +176,11 @@ async function addRole() {
     ]);
 
     // Query to add new role to database
-    const queryStr = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
-    connection.query(queryStr, [roleTitle, roleSalary, departmentUnder], (err, res) => {
-        console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
-        init();
-    });
+    await db.addNewRole(roleTitle, roleSalary, departmentUnder);
+
+    console.log(`Added new role ${roleTitle} with salary ${roleSalary}.`);
+
+    init();
 }
 
 // Function to update the role an employee holds
@@ -216,14 +217,9 @@ async function updateEmployeeRole() {
     ]);
 
     // Query to update database accordingly
-    connection.query(
-        `UPDATE employees
-        SET role_id = ?
-        WHERE id = ?`,
-        [newRole, employeeChosen],
-        (err, res) => {
-            console.log(`Successfully changed employee role!`);
-            init();
-        }
-    );
+    await db.modifyRole(employeeChosen, newRole);
+
+    console.log(`Successfully changed employee role!`);
+            
+    init();
 }
